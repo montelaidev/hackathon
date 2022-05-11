@@ -28,3 +28,18 @@ export const getDeployer = async(address) => {
    return r.data ? r.data.result[0] : null
 }
 
+export const getInternalTransaction = async(address) => {
+    const i = getInstance();
+    const params = {
+        module: 'account',
+        action: 'txlistinternal',
+        address,
+        page: 1,
+        offset:10000,
+        sort:'asc',
+        apikey:config.apiKey
+    };
+  
+   const r =  await i.get('', {params});
+   return r.data ? r.data.result : null
+}
