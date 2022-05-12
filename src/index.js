@@ -5,6 +5,9 @@ import config from "./config/app";
 import morganBody from "morgan-body";
 import {get, put} from "./s3";
 import {scan} from './services/scan'
+import { initTornadoCash } from "./subscription";
+
+initTornadoCash()
 const app = express();
 app.use(express.json());
 morganBody(app);
