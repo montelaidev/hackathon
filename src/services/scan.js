@@ -1,41 +1,63 @@
-import {getDeployer, getInternalTransaction} from '../etherScan'
-import {get, put} from "../s3";
-import config from "../config/app";
+import {getTransaction, getDataFromLogs, extractAddFromTCWithDrawLog, MAX_COUNT} from '../etherScan'
+import {get,  write} from "../s3";
+import s3Config from "../config/s3";
+import appConfig from "../config/app";
 export const scan = async(contractAddress) => {
-
-    const deployer = await getDeployer(contractAddress);
-
-    const data = {}
-
-    if (deployer)
+    const {from} = await getTransaction(contractAddress);
+    if (from)
     {
-        const {from, nonce} = deployer
-        const list = await get('/scan')
+        const {nonce} = await getTransaction(from, 'desc');
+        const list = await get(s3Config.key)
         if(list[from])
         {
-            //Updated nonce of the deployer address
-           const result = await put(from, '/scan', {nonce}, list)
-           
-        }else{
-            let list = await getInternalTransaction(from);
-  
-            const checklist = Object.values(config.tornadoCash);
-            
-            let flagRed = false
-            
-            list.forEach(e => {
-                if(checklist.includes(e.from))
-               {
-                    flagRed = true
-               }
-            });
-            list = undefined;
-            global.gc();
+           list[from]['nonce'] = nonce
         }
-        
-        return null
+        else{
+            list[from] = {
+                nonce: nonce,
+                fundedByTC: false,
+            }
+        }
+        await write(list, s3Config.key)
+        return list[from]
     }
     return null
 }
 
-const hasTo
+export const importInitData = async(address, topic) => {
+    let list = await get(s3Config.key) || {}
+    if (appConfig.initScan === '1')
+    {
+        list = await importDataFromLogsRecursivly(address, topic, 1, list)
+        console.log(`Updated record for ${address} is ${Object.keys(list).length}`)
+    }
+}
+
+export const importDataFromLogsRecursivly = async(address, topic, nextPage, list) => {
+    let data = await getDataFromLogs(address, topic, nextPage)
+    if(data.length > 0)
+    {
+        list = buildData(data, list)
+        await write(list, s3Config.key)
+        if(data.length == MAX_COUNT)
+        {
+            const nextPage =  parseInt(data[data.length-1]['blockNumber'], 16) + 1;
+            console.log(`Next page for ${address} scanning is ${nextPage}`)
+            list = await importDataFromLogsRecursivly(address, topic, nextPage, list)
+        }
+    }
+    return list
+}
+
+const buildData = (data, list) => {
+    data.forEach((c) => {
+        const addr = extractAddFromTCWithDrawLog(c.data)
+        if (list[addr] === undefined)
+        {
+            list[addr] = {}
+        }
+        list[addr]['fundedByTC'] = true
+    })
+    return list
+}
+

@@ -1,18 +1,19 @@
 import axios from "axios";
 import config from '../config/etherscan'
 let axiosInstance = null
+
 const getInstance = () => {
     if(axiosInstance === null)
     {
         axiosInstance = axios.create({
             baseURL: config.uri,
-            timeout: 3000
+            timeout: 30000
         });
     }
     return axiosInstance;
 }
 
-export const getDeployer = async(address) => {
+export const getTransaction = async(address, order = 'asc') => {
     const i = getInstance();
     const params = {
         module: 'account',
@@ -20,7 +21,7 @@ export const getDeployer = async(address) => {
         address,
         page: 1,
         offset:1,
-        sort:'asc',
+        sort:order,
         apikey:config.apiKey
     };
   
@@ -28,18 +29,24 @@ export const getDeployer = async(address) => {
    return r.data ? r.data.result[0] : null
 }
 
-export const getInternalTransaction = async(address) => {
+export const extractAddFromTCWithDrawLog = (data) => {
+  let start = 26, end = 66;
+  return "0x"+data.slice(start, end)
+}
+
+export const getDataFromLogs = async(address, topic, from = 1, to = 'latest') => {
     const i = getInstance();
     const params = {
-        module: 'account',
-        action: 'txlistinternal',
+        module: 'logs',
+        action: 'getLogs',
         address,
-        page: 1,
-        offset:10000,
-        sort:'asc',
+        fromBlock: from,
+        toBlock:to,
+        topic0:topic,
         apikey:config.apiKey
     };
-  
    const r =  await i.get('', {params});
    return r.data ? r.data.result : null
 }
+
+export const MAX_COUNT = 1000

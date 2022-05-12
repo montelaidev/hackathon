@@ -1,30 +1,57 @@
 import express from "express";
 import cors from "cors";
-import path from "path";
-import config from "./config/app";
+import appConfig from "./config/app";
+import ethScanConfig from "./config/etherScan";
 import morganBody from "morgan-body";
-import {get, put} from "./s3";
-import {scan} from './services/scan'
+import * as ScanService from './services/scan'
 const app = express();
 app.use(express.json());
+// app.use(cors({
+//   origin: '*'
+// }));
 morganBody(app);
 
 app.post("/scan", async (req, res) => {
-  const {address} = req.body;
-  const data = await scan(address)
-  
-  // const s = await put(address, {
-  //    fundByTornado: false, nonce: 31, level : 1
-  // });
+    try{
+      const {address} = req.body;
+      if(!address)
+      {
+        res.status(400);
+        return res.json({
+          success: false,
+          data: null,
+          error: 'Address is required'
+        });
+      }
+      const scanResult = await ScanService.scan(address)
+      return res.json({
+        success: true,
+        data: scanResult
+      });
+    }catch(err)
+    {
+      res.status(500);
+      return res.json({
+        success: false,
+        data: null,
+        error: err.message
+      });
+    }
+});
 
-  // const data = await get();
-  
-  return res.json({
-    success: true,
-    data: data
+Promise.all(
+  [ScanService.importInitData(ethScanConfig.tornadoCash.address['1'], ethScanConfig.tornadoCash.withDrawTopic)]
+).then(() => Promise.all(
+  [ScanService.importInitData(ethScanConfig.tornadoCash.address['10'], ethScanConfig.tornadoCash.withDrawTopic)]
+)).then(() => Promise.all(
+  [ScanService.importInitData(ethScanConfig.tornadoCash.address['100'], ethScanConfig.tornadoCash.withDrawTopic)]
+))
+.then(() => {
+  app.listen(appConfig.port, () => {
+    console.log(`Server is running on port ${appConfig.port}.`);
   });
+}
+).catch(err => {
+    console.log(`Init error.`, err);
 });
 
-app.listen(config.app.port, () => {
-  console.log(`Server is running on port ${config.app.port}.`);
-});
