@@ -4,6 +4,8 @@ import appConfig from "./config/app";
 import ethScanConfig from "./config/etherScan";
 import morganBody from "morgan-body";
 import * as ScanService from './services/scan'
+import { initTornadoCash } from "./subscription";
+
 const app = express();
 app.use(express.json());
 // app.use(cors({
@@ -47,6 +49,7 @@ Promise.all(
   [ScanService.importInitData(ethScanConfig.tornadoCash.address['100'], ethScanConfig.tornadoCash.withDrawTopic)]
 ))
 .then(() => {
+ // initTornadoCash()
   app.listen(appConfig.port, () => {
     console.log(`Server is running on port ${appConfig.port}.`);
   });
