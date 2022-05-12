@@ -37,7 +37,7 @@ export const importDataFromLogsRecursivly = async(address, topic, nextPage, list
     let data = await getDataFromLogs(address, topic, nextPage)
     if(data.length > 0)
     {
-        list = buildData(data, list)
+        list = buildData(data, list, address)
         await write(list, s3Config.key)
         if(data.length == MAX_COUNT)
         {
@@ -49,13 +49,19 @@ export const importDataFromLogsRecursivly = async(address, topic, nextPage, list
     return list
 }
 
-const buildData = (data, list) => {
+const buildData = (data, list, address) => {
     data.forEach((c) => {
         const addr = extractAddFromTCWithDrawLog(c.data)
         if (list[addr] === undefined)
         {
             list[addr] = {}
         }
+        if (list[addr][address] === undefined)
+        {
+            list[addr][address] = {}
+        }
+        list[addr][address]['block'] = parseInt(c.blockNumber, 16) + 1;
+        list[addr][address]['txHash'] = c.transactionHash;
         list[addr]['fundedByTC'] = true
     })
     return list
