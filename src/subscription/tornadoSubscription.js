@@ -19,7 +19,7 @@ export const tornadoSubscription = (wsHost, tornadoReceiptType) => {
         const saveData = {
           [tornadoReceiptType] : {
             txHash: data.transactionHash,
-            block: data.blockNumber,
+            block: parseInt(data.blockNumber, 16)
           },
           fundedByTC: true
         }
