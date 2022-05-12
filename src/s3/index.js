@@ -32,3 +32,12 @@ export const put = async (address, key, data, list = {}) => {
     return body
 };
 
+export const write = async (body, key) => {
+    const params = {
+        Bucket: s3Config.bucket,
+        Key: key,
+        Body: JSON.stringify(body)
+    };
+    await connection.putObject(params).promise();
+    return body
+};
