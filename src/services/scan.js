@@ -22,7 +22,7 @@ export const scan = async(contractAddress) => {
         await write(list, s3Config.key)
         return [from, list[from]]
     }
-    return null
+    return [null, null]
 }
 
 export const computeRiskLevel = (data) =>{
