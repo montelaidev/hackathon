@@ -2,6 +2,7 @@ import {getTransaction, getDataFromLogs, extractAddFromTCWithDrawLog, MAX_COUNT}
 import {get,  write} from "../s3";
 import s3Config from "../config/s3";
 import appConfig from "../config/app";
+import { LEVELS } from "../constants/levels"
 export const scan = async(contractAddress) => {
     const {from} = await getTransaction(contractAddress);
     if (from)
@@ -19,9 +20,25 @@ export const scan = async(contractAddress) => {
             }
         }
         await write(list, s3Config.key)
-        return list[from]
+        return [from, list[from]]
     }
-    return null
+    return [null, null]
+}
+
+export const computeRiskLevel = (data) =>{
+    if(data.fundedByTC)
+    {
+        if(data.nonce && parseInt(data.nonce) > appConfig.nonceLevel)
+        {
+            return LEVELS.YELLOW
+        }
+        else
+        {
+            return LEVELS.RED
+        }
+    }
+    return LEVELS.GREEN
+    
 }
 
 export const importInitData = async(address, topic) => {

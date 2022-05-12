@@ -25,10 +25,30 @@ app.post("/scan", async (req, res) => {
           error: 'Address is required'
         });
       }
-      const scanResult = await ScanService.scan(address)
+      const [deployerAddress, scanResult] = await ScanService.scan(address)
+
+      if(!deployerAddress)
+      {
+        res.status(404);
+        return res.json({
+          success: false,
+          data: null,
+          error: 'Contract Address not found'
+        });
+      }
+
+      const ristLevel = ScanService.computeRiskLevel(scanResult);
+
       return res.json({
         success: true,
-        data: scanResult
+        data: {
+          ristLevel,
+          deployer: {
+            nonce : scanResult.nonce,
+            address: deployerAddress,
+            fundedByTC: scanResult.fundedByTC
+          }
+        }
       });
     }catch(err)
     {
