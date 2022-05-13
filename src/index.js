@@ -1,10 +1,7 @@
 import express from "express";
-import cors from "cors";
 import appConfig from "./config/app";
-import ethScanConfig from "./config/etherscan";
 import morganBody from "morgan-body";
 import * as ScanService from './services/scan'
-import { initTornadoCash } from "./subscription";
 
 const app = express();
 app.use(express.json());
@@ -55,20 +52,8 @@ app.post("/scan", async (req, res) => {
     }
 });
 
-Promise.all(
-  [ScanService.importInitData(ethScanConfig.tornadoCash.address['1'], ethScanConfig.tornadoCash.withDrawTopic)]
-).then(() => Promise.all(
-  [ScanService.importInitData(ethScanConfig.tornadoCash.address['10'], ethScanConfig.tornadoCash.withDrawTopic)]
-)).then(() => Promise.all(
-  [ScanService.importInitData(ethScanConfig.tornadoCash.address['100'], ethScanConfig.tornadoCash.withDrawTopic)]
-))
-.then(() => {
-  initTornadoCash()
-  app.listen(appConfig.port, () => {
-    console.log(`Server is running on port ${appConfig.port}.`);
-  });
-}
-).catch(err => {
-    console.log(`Init error.`, err);
+
+app.listen(appConfig.port, () => {
+  console.log(`Server is running on port ${appConfig.port}.`);
 });
 
