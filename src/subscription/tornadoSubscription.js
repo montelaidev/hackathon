@@ -11,18 +11,10 @@ export const tornadoSubscription = (wsHost, tornadoReceiptType) => {
     const withdrawFilter = contract.filters.Withdrawal(null,null,null,null)
     console.debug(withdrawFilter)
 
-    contract.on(withdrawFilter, async (data) => {
-        console.debug("event: ", data);
+    contract.on(withdrawFilter, async (to, nullifierHash, relayer, fee) => {
+        console.debug("event: ", to, nullifierHash, relayer, fee);
         // Func Sig: 0xb438689f
         // Args Withdrawal (address to, bytes32 nullifierHash, index_topic_1 address relayer, uint256 fee)
-        const to = data; 
-        const saveData = {
-          [tornadoReceiptType] : {
-            txHash: data.transactionHash,
-            block: parseInt(data.blockNumber, 16)
-          },
-          fundedByTC: true
-        }
-        await put(to, s3Config.key, saveData)
+        await put(to, s3Config.key, 1)
       });
 }
