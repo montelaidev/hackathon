@@ -15,7 +15,7 @@ export const tornadoSubscription = (wsHost, tornadoReceiptType) => {
         console.debug("event: ", data);
         // Func Sig: 0xb438689f
         // Args Withdrawal (address to, bytes32 nullifierHash, index_topic_1 address relayer, uint256 fee)
-        const [to, nullifierHash, relayerAddr] = data.args; 
+        const to = data; 
         const saveData = {
           [tornadoReceiptType] : {
             txHash: data.transactionHash,

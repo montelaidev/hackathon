@@ -4,16 +4,16 @@ import s3Config from "../config/s3";
 import appConfig from "../config/app";
 import { LEVELS } from "../constants/levels"
 export const scan = async(contractAddress) => {
-    const {from} = await getTransaction(contractAddress);
-    if (from)
+    const result = await getTransaction(contractAddress);
+    if (result && result.from)
     {
         const [list, verified] = await Promise.all([
            // getTransaction(from, 'desc'),
             get(s3Config.key),
             verifyContract(contractAddress)
         ])
-        const fundedByTC = list ? list[from] ? true : false : false;
-        return [from, verified ,fundedByTC]
+        const fundedByTC = list ? list[result.from] ? true : false : false;
+        return [result.from, verified ,fundedByTC]
     }
     return [null, false, false]
 }
