@@ -3,7 +3,10 @@ import config from '../config/app'
 import etherScanConfig from '../config/etherscan'
 
 export const initTornadoCash = () => {
-    const tornadoCash1 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.address['1'])
-    const tornadoCash10 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.address['10'])
-    const tornadoCash100 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.address['100'])
+    //main net
+    const tornadoCash01 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.network[process.env.CHAIN_ID]['0_1'])
+    const tornadoCash1 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.network[process.env.CHAIN_ID]['1'])
+    const tornadoCash10 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.network[process.env.CHAIN_ID]['10'])
+    const tornadoCash100 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.network[process.env.CHAIN_ID]['100'])
+
 }
