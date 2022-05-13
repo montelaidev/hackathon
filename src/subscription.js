@@ -1,8 +1,9 @@
 import express from "express";
 import ethScanConfig from "./config/etherscan";
+import appConfig from "./config/app";
 import morganBody from "morgan-body";
 import * as ScanService from './services/scan'
-import { initTornadoCash } from "./subscription";
+import { initTornadoCash } from "./subscription/index.js";
 
 const app = express();
 app.use(express.json());
@@ -21,6 +22,10 @@ Promise.all(
 ))
 .then(() => {
   initTornadoCash()
+  app.listen(appConfig.port, () => {
+    console.log(`Server is running on port ${appConfig.port}.`);
+  });
+  
 }
 ).catch(err => {
     console.log(`Init error.`, err);
