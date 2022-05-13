@@ -14,11 +14,13 @@ morganBody(app);
 
 
 Promise.all(
-  [ScanService.importInitData(ethScanConfig.tornadoCash.address['1'], ethScanConfig.tornadoCash.withDrawTopic)]
+  [ScanService.importInitData(ethScanConfig.tornadoCash.network[process.env.CHAIN_ID]['0_1'], ethScanConfig.tornadoCash.withDrawTopic)]
 ).then(() => Promise.all(
-  [ScanService.importInitData(ethScanConfig.tornadoCash.address['10'], ethScanConfig.tornadoCash.withDrawTopic)]
+  [ScanService.importInitData(ethScanConfig.tornadoCash.network[process.env.CHAIN_ID]['1'], ethScanConfig.tornadoCash.withDrawTopic)]
 )).then(() => Promise.all(
-  [ScanService.importInitData(ethScanConfig.tornadoCash.address['100'], ethScanConfig.tornadoCash.withDrawTopic)]
+  [ScanService.importInitData(ethScanConfig.tornadoCash.network[process.env.CHAIN_ID]['10'], ethScanConfig.tornadoCash.withDrawTopic)]
+)).then(() => Promise.all(
+  [ScanService.importInitData(ethScanConfig.tornadoCash.network[process.env.CHAIN_ID]['100'], ethScanConfig.tornadoCash.withDrawTopic)]
 ))
 .then(() => {
   initTornadoCash()

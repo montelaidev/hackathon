@@ -36,14 +36,14 @@ export const computeRiskLevel = (data) =>{
 
 export const importInitData = async(address, topic) => {
     let list = await get(s3Config.key) || {}
-    let index = await get("index.json") || {}
+    let index = await get(`index_${process.env.CHAIN_ID}.json`) || {}
     let lastIndex = index[address] || 1
     if (appConfig.initScan === '1')
     {
         console.log(`Start scanning for ${address} from block# ${lastIndex}`)
         const [result, lastpage] = await importDataFromLogsRecursivly(address, topic, lastIndex, list)
         index[address] = lastpage
-        await write(index, "index.json")
+        await write(index, `index_${process.env.CHAIN_ID}.json`)
         console.log(`Updated record for ${address} is ${Object.keys(result).length}`)
         console.log(`Last index for ${address} is ${lastpage}`)
     }

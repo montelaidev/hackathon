@@ -11,6 +11,7 @@
     "watch": "nodemon -r esm src/index.js"
   },
   "dependencies": {
+    "hardhat": "^2.9.5",
     "aws-sdk": "^2.1132.0",
     "axios": "^0.27.2",
     "cors": "^2.8.5",
