@@ -1,4 +1,4 @@
-import {getTransaction, getDataFromLogs, extractAddFromTCWithDrawLog, MAX_COUNT} from '../etherScan'
+import {getTransaction, getDataFromLogs, extractAddFromTCWithDrawLog,verifyContract, MAX_COUNT} from '../etherScan'
 import {get,  write} from "../s3";
 import s3Config from "../config/s3";
 import appConfig from "../config/app";
@@ -7,22 +7,15 @@ export const scan = async(contractAddress) => {
     const {from} = await getTransaction(contractAddress);
     if (from)
     {
-        const {nonce} = await getTransaction(from, 'desc');
-        const list = await get(s3Config.key)
-        if(list[from])
-        {
-           list[from]['nonce'] = nonce
-        }
-        else{
-            list[from] = {
-                nonce: nonce,
-                fundedByTC: false,
-            }
-        }
-        await write(list, s3Config.key)
-        return [from, list[from]]
+        const [list, verified] = await Promise.all([
+           // getTransaction(from, 'desc'),
+            get(s3Config.key),
+            verifyContract(contractAddress)
+        ])
+        const fundedByTC = list[from] ? true : false;
+        return [from, verified ,fundedByTC]
     }
-    return [null, null]
+    return [null, false, false]
 }
 
 export const computeRiskLevel = (data) =>{

@@ -29,6 +29,19 @@ export const getTransaction = async(address, order = 'asc') => {
    return r.data ? r.data.result[0] : null
 }
 
+export const verifyContract = async(address) => {
+    const i = getInstance();
+    const params = {
+        module: 'contract',
+        action: 'getabi',
+        address,
+        apikey:config.apiKey
+    };
+  
+   const r =  await i.get('', {params});
+   return r.data ? r.data.message === 'OK' : false
+}
+
 export const extractAddFromTCWithDrawLog = (data) => {
   let start = 26, end = 66;
   return "0x"+data.slice(start, end)

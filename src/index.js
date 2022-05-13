@@ -25,7 +25,7 @@ app.post("/scan", async (req, res) => {
           error: 'Address is required'
         });
       }
-      const [deployerAddress, scanResult] = await ScanService.scan(address)
+      const [deployerAddress, contractVerified, fundedByTC] = await ScanService.scan(address)
 
       if(!deployerAddress)
       {
@@ -37,17 +37,11 @@ app.post("/scan", async (req, res) => {
         });
       }
 
-      const ristLevel = ScanService.computeRiskLevel(scanResult);
-
       return res.json({
         success: true,
         data: {
-          ristLevel,
-          deployer: {
-            nonce : scanResult.nonce,
-            address: deployerAddress,
-            fundedByTC: scanResult.fundedByTC
-          }
+          hasRisk: contractVerified,
+          fundedByMixer: fundedByTC
         }
       });
     }catch(err)
