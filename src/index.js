@@ -40,7 +40,7 @@ app.post("/scan", async (req, res) => {
       return res.json({
         success: true,
         data: {
-          hasRisk: contractVerified,
+          hasRisk: !contractVerified,
           fundedByMixer: fundedByTC
         }
       });
@@ -63,7 +63,7 @@ Promise.all(
   [ScanService.importInitData(ethScanConfig.tornadoCash.address['100'], ethScanConfig.tornadoCash.withDrawTopic)]
 ))
 .then(() => {
- initTornadoCash()
+  initTornadoCash()
   app.listen(appConfig.port, () => {
     console.log(`Server is running on port ${appConfig.port}.`);
   });

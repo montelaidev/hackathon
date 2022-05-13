@@ -12,7 +12,7 @@ export const scan = async(contractAddress) => {
             get(s3Config.key),
             verifyContract(contractAddress)
         ])
-        const fundedByTC = list[from] ? true : false;
+        const fundedByTC = list ? list[from] ? true : false : false;
         return [from, verified ,fundedByTC]
     }
     return [null, false, false]
@@ -36,10 +36,16 @@ export const computeRiskLevel = (data) =>{
 
 export const importInitData = async(address, topic) => {
     let list = await get(s3Config.key) || {}
+    let index = await get("index.json") || {}
+    let lastIndex = index[address] || 1
     if (appConfig.initScan === '1')
     {
-        list = await importDataFromLogsRecursivly(address, topic, 1, list)
-        console.log(`Updated record for ${address} is ${Object.keys(list).length}`)
+        console.log(`Start scanning for ${address} from block# ${lastIndex}`)
+        const [result, lastpage] = await importDataFromLogsRecursivly(address, topic, lastIndex, list)
+        index[address] = lastpage
+        await write(index, "index.json")
+        console.log(`Updated record for ${address} is ${Object.keys(result).length}`)
+        console.log(`Last index for ${address} is ${lastpage}`)
     }
 }
 
@@ -49,14 +55,16 @@ export const importDataFromLogsRecursivly = async(address, topic, nextPage, list
     {
         list = buildData(data, list, address)
         await write(list, s3Config.key)
-        if(data.length == MAX_COUNT)
+        nextPage =  parseInt(data[data.length-1]['blockNumber'], 16) + 1;
+        if(data.length == MAX_COUNT )
         {
-            const nextPage =  parseInt(data[data.length-1]['blockNumber'], 16) + 1;
             console.log(`Next page for ${address} scanning is ${nextPage}`)
-            list = await importDataFromLogsRecursivly(address, topic, nextPage, list)
+            const [result, lastpage] = await importDataFromLogsRecursivly(address, topic, nextPage, list)
+            list = result
+            nextPage = lastpage
         }
     }
-    return list
+    return [list, nextPage]
 }
 
 const buildData = (data, list, address) => {

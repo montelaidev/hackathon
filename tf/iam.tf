@@ -11,7 +11,7 @@ data "aws_iam_policy_document" "worker_node_policy_document" {
     ]
 
     resources = [
-      aws_s3_bucket.contractscan.arn
+      "*"
     ]
 
     effect = "Allow"
@@ -23,10 +23,10 @@ data "aws_iam_policy_document" "worker_node_policy_document" {
       "s3:DeleteObject",
       "s3:ListMultipartUploadParts",
       "s3:AbortMultipartUpload"
-
     ]
 
     resources = [
+      "${aws_s3_bucket.contractscan.arn}/",
       "${aws_s3_bucket.contractscan.arn}/*"
     ]
 
