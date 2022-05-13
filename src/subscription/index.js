@@ -1,6 +1,6 @@
 import {tornadoSubscription} from './tornadoSubscription'
 import config from '../config/app'
-import etherScanConfig from '../config/etherScan'
+import etherScanConfig from '../config/etherscan'
 
 export const initTornadoCash = () => {
     const tornadoCash1 = tornadoSubscription(config.provider, etherScanConfig.tornadoCash.address['1'])
