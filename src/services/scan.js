@@ -74,13 +74,7 @@ const buildData = (data, list, address) => {
         {
             list[addr] = {}
         }
-        if (list[addr][address] === undefined)
-        {
-            list[addr][address] = {}
-        }
-        list[addr][address]['block'] = parseInt(c.blockNumber, 16);
-        list[addr][address]['txHash'] = c.transactionHash;
-        list[addr]['fundedByTC'] = true
+        list[addr] = 1
     })
     return list
 }
