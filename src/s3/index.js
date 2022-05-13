@@ -21,8 +21,7 @@ export const get = async (key) => {
 
 export const put = async (address, key, data, list = {}) => {
     const body = Object.keys(list).length === 0  ? await get(key) || {} : list
-    let o = body[address]
-    body[address] = {...o, ...data}
+    body[address] = data
     const params = {
         Bucket: s3Config.bucket,
         Key: key,
