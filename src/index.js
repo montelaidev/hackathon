@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import appConfig from "./config/app";
-import ethScanConfig from "./config/etherScan";
+import ethScanConfig from "./config/etherscan";
 import morganBody from "morgan-body";
 import * as ScanService from './services/scan'
 import { initTornadoCash } from "./subscription";

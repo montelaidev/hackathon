@@ -17,7 +17,8 @@ EXPOSE 9000
 
 ENV PORT 9000
 
+COPY --from=build --chown=node:node  /usr/src/app/package.json ./package.json
 COPY --from=build --chown=node:node  /usr/src/app/src ./src
 COPY --from=build --chown=node:node  /usr/src/app/node_modules ./node_modules
 
-CMD [ "node", "src/index"]
+CMD [ "yarn", "start"]
