@@ -1,7 +1,12 @@
 require('dotenv').config();
 export default {
     apiKey: process.env.ETHERSCAN_KEY,
-    uri: process.env.ETHERSCAN_URI || 'https://api.etherscan.io/api',
+    uri: {
+      network: {
+        1: 'https://api.etherscan.io/api',
+        5: 'https://api-goerli.etherscan.io/api',
+      }
+    },
     tornadoCash: {
       withDrawTopic: '0xe9e508bad6d4c3227e881ca19068f099da81b5164dd6d62b2eaf1e8bc6c34931',
       network: {
