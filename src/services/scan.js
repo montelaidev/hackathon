@@ -1,16 +1,18 @@
 import {getTransaction, getDataFromLogs, extractAddFromTCWithDrawLog,verifyContract, MAX_COUNT} from '../etherScan'
 import {get,  write} from "../s3";
-import s3Config from "../config/s3";
 import appConfig from "../config/app";
 import { LEVELS } from "../constants/levels"
-export const scan = async(contractAddress) => {
-    const result = await getTransaction(contractAddress);
+import {getS3DataKey, getS3IndexKey} from "../helpers/s3";
+export const scan = async(contractAddress, chainId = 1) => {
+    
+    const result = await getTransaction(contractAddress, 'asc', chainId);
     if (result && result.from)
     {
+        
         const [list, verified] = await Promise.all([
            // getTransaction(from, 'desc'),
-            get(s3Config.key),
-            verifyContract(contractAddress)
+            get(getS3DataKey(chainId)),
+            verifyContract(contractAddress, chainId)
         ])
         const fundedByTC = list ? list[result.from] ? true : false : false;
         return [result.from, verified ,fundedByTC]
@@ -35,26 +37,26 @@ export const computeRiskLevel = (data) =>{
 }
 
 export const importInitData = async(address, topic) => {
-    let list = await get(s3Config.key) || {}
-    let index = await get(`index_${process.env.CHAIN_ID}.json`) || {}
+    let list = await get(getS3DataKey()) || {}
+    let index = await get(getS3IndexKey()) || {}
     let lastIndex = index[address] || 1
     if (appConfig.initScan === '1')
     {
         console.log(`Start scanning for ${address} from block# ${lastIndex}`)
         const [result, lastpage] = await importDataFromLogsRecursivly(address, topic, lastIndex, list)
         index[address] = lastpage
-        await write(index, `index_${process.env.CHAIN_ID}.json`)
+        await write(index, getS3IndexKey())
         console.log(`Updated record for ${address} is ${Object.keys(result).length}`)
         console.log(`Last index for ${address} is ${lastpage}`)
     }
 }
 
-export const importDataFromLogsRecursivly = async(address, topic, nextPage, list) => {
-    let data = await getDataFromLogs(address, topic, nextPage)
+export const importDataFromLogsRecursivly = async(address, topic, nextPage,  list) => {
+    let data = await getDataFromLogs(address, topic, nextPage, 'latest',process.env.CHAIN_ID)
     if(data.length > 0)
     {
         list = buildData(data, list, address)
-        await write(list, s3Config.key)
+        await write(list, getS3DataKey())
         nextPage =  parseInt(data[data.length-1]['blockNumber'], 16) + 1;
         if(data.length == MAX_COUNT )
         {

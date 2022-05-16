@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import tornadoAbi from '../abi/tornadoReceipt.json'
 import { put } from '../s3';
-import s3Config from '../config/s3';
+import {getS3DataKey} from "../helpers/s3";
 export const tornadoSubscription = (wsHost, tornadoReceiptType) => {
     const provider = new ethers.providers.WebSocketProvider(wsHost)
 
@@ -15,6 +15,6 @@ export const tornadoSubscription = (wsHost, tornadoReceiptType) => {
         console.debug("event: ", to, nullifierHash, relayer, fee);
         // Func Sig: 0xb438689f
         // Args Withdrawal (address to, bytes32 nullifierHash, index_topic_1 address relayer, uint256 fee)
-        await put(to, s3Config.key, 1)
+        await put(to, getS3DataKey(), 1)
       });
 }

@@ -13,6 +13,7 @@ morganBody(app);
 app.post("/scan", async (req, res) => {
     try{
       const {address} = req.body;
+      const {chainid} =req.headers;
       if(!address)
       {
         res.status(400);
@@ -22,7 +23,7 @@ app.post("/scan", async (req, res) => {
           error: 'Address is required'
         });
       }
-      const [deployerAddress, contractVerified, fundedByTC] = await ScanService.scan(address)
+      const [deployerAddress, contractVerified, fundedByTC] = await ScanService.scan(address, chainid)
 
       if(!deployerAddress)
       {

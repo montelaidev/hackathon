@@ -1,20 +1,22 @@
 import axios from "axios";
 import config from '../config/etherscan'
-let axiosInstance = null
+let axiosInstance = new Map()
 
-const getInstance = () => {
-    if(axiosInstance === null)
-    {
-        axiosInstance = axios.create({
-            baseURL: config.uri,
+const getInstance = (chainId = 1) => {
+    if (
+        !axiosInstance.has(chainId)
+    ){
+        const instance = axios.create({
+            baseURL: config.uri.network[chainId],
             timeout: 30000
         });
+        axiosInstance.set(chainId, instance)     
     }
-    return axiosInstance;
+    return axiosInstance.get(chainId)
 }
 
-export const getTransaction = async(address, order = 'asc') => {
-    const i = getInstance();
+export const getTransaction = async(address, order = 'asc', chainId = 1) => {
+    const i = getInstance(chainId);
     const params = {
         module: 'account',
         action: 'txlist',
@@ -24,20 +26,18 @@ export const getTransaction = async(address, order = 'asc') => {
         sort:order,
         apikey:config.apiKey
     };
-  
    const r =  await i.get('', {params});
    return r.data ? r.data.result[0] : null
 }
 
-export const verifyContract = async(address) => {
-    const i = getInstance();
+export const verifyContract = async(address, chainId = 1) => {
+    const i = getInstance(chainId);
     const params = {
         module: 'contract',
         action: 'getabi',
         address,
         apikey:config.apiKey
     };
-  
    const r =  await i.get('', {params});
    return r.data ? r.data.message === 'OK' : false
 }
@@ -47,8 +47,8 @@ export const extractAddFromTCWithDrawLog = (data) => {
   return "0x"+data.slice(start, end)
 }
 
-export const getDataFromLogs = async(address, topic, from = 1, to = 'latest') => {
-    const i = getInstance();
+export const getDataFromLogs = async(address, topic, from = 1, to = 'latest', chainId = 1) => {
+    const i = getInstance(chainId);
     const params = {
         module: 'logs',
         action: 'getLogs',
